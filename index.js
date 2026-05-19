@@ -13,7 +13,7 @@ const client = new Client({
 });
 
 // ⚠️ ВСТАВЬТЕ ВАШ НОВЫЙ ТОКЕН
-const TOKEN = 'MTUwNjEzNjUwNjY3NzQ2NTIyOA.GqNVsv.u1nVjrASmy4cYe6NU3YHGzE7bIZfVYDs5SnRSQ';
+const TOKEN = process.env.TOKEN;
 const CHANNEL_ID = '1494290117269913690';
 
 const people = [
