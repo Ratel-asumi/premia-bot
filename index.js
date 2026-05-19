@@ -1,4 +1,5 @@
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
+const express = require('express');
 
 const client = new Client({
     intents: [
@@ -104,5 +105,11 @@ client.on('messageReactionRemove', async (reaction, user) => {
         console.log(`↩️ ${user.tag} снял(а) отметку для ${info.name}`);
     } catch (err) { console.error(err); }
 });
+
+// ========== ВЕБ-СЕРВЕР ДЛЯ RAILWAY ==========
+const app = express();
+app.get('/', (req, res) => res.send('Бот работает!'));
+app.listen(process.env.PORT || 3000, () => console.log('Сервер запущен для пингов'));
+// ===========================================
 
 client.login(TOKEN);
