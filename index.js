@@ -12,10 +12,11 @@ const client = new Client({
     partials: [Partials.Message, Partials.Reaction]
 });
 
-// ⚠️ ВСТАВЬТЕ ВАШ НОВЫЙ ТОКЕН
+// ⚠️ ВСТАВЬТЕ ВАШ ТОКЕН (в кавычках)
 const TOKEN = process.env.TOKEN;
 const CHANNEL_ID = '1494290117269913690';
 
+// Сегодняшние люди (19 мая)
 const people = [
     { id: '234734984131248128', name: 'Ден Картер', amount: '30', status: '⬜ НЕ ВЫДАНО', done: false },
     { id: '450198219167891457', name: 'Глен Клири', amount: '36', status: '⬜ НЕ ВЫДАНО', done: false },
@@ -25,7 +26,7 @@ const people = [
 
 function createHeader() {
     return `\`\`\`ansi
-[1;34m📖 ПРЕМИИ ЗА 19 МАЯ 1901 г. (БУХ.КНИГА)[0m
+[1;34m📖 ПРЕМИИ ЗА 19 МАЯ (БУХ.КНИГА)[0m
 [36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
 [47;30m  Каждый нажимает галочку под своим именем. Повторное нажатие снимает отметку.  [0m
 [33m✅ нажмите на галочку, чтобы отметить получение [0m
@@ -40,11 +41,24 @@ function createPersonMessage(person) {
 [36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
 \`\`\``;
     const mention = `<@${person.id}>`;
-    // Убираем последний перевод строки после закрывающих ``` и приклеиваем тег без лишних переносов
     return ansiBlock.replace(/\n```$/, '```') + mention;
 }
 
-const personMessages = new Map();
+// Извлекает ID пользователя из упоминания в конце сообщения
+function extractUserIdFromMessage(content) {
+    const match = content.match(/<@!?(\d+)>$/);
+    return match ? match[1] : null;
+}
+
+// Переключает статус в тексте сообщения
+function toggleStatusInMessage(content) {
+    if (content.includes('⬜ НЕ ВЫДАНО')) {
+        return content.replace('⬜ НЕ ВЫДАНО', '✅ ВЫДАНО');
+    } else if (content.includes('✅ ВЫДАНО')) {
+        return content.replace('✅ ВЫДАНО', '⬜ НЕ ВЫДАНО');
+    }
+    return null;
+}
 
 client.once('ready', async () => {
     console.log(`✅ Бот ${client.user.tag} запущен!`);
@@ -54,11 +68,11 @@ client.once('ready', async () => {
         return;
     }
     try {
+        // Отправляем только если сегодня ещё не отправляли (можно удалить старые вручную)
         await channel.send(createHeader());
         for (const person of people) {
             const message = await channel.send(createPersonMessage(person));
             await message.react('✅');
-            personMessages.set(message.id, { id: person.id, name: person.name });
             console.log(`✅ Сообщение для ${person.name} отправлено`);
         }
         console.log(`✅ Все сообщения отправлены!`);
@@ -67,44 +81,59 @@ client.once('ready', async () => {
     }
 });
 
+// Добавление реакции ✅
 client.on('messageReactionAdd', async (reaction, user) => {
     if (user.bot) return;
     if (reaction.partial) await reaction.fetch();
     if (reaction.emoji.name !== '✅') return;
+
     const message = reaction.message;
-    const info = personMessages.get(message.id);
-    if (!info) return;
-    if (user.id !== info.id) {
+    if (message.author.id !== client.user.id) return;
+
+    const content = message.content;
+    const targetUserId = extractUserIdFromMessage(content);
+    if (!targetUserId) return;
+
+    if (user.id !== targetUserId) {
         await reaction.users.remove(user.id);
-        console.log(`⚠️ ${user.tag} пытался отметить ${info.name}, но не имеет прав`);
+        console.log(`⚠️ ${user.tag} пытался отметить чужое сообщение`);
         return;
     }
-    const person = people.find(p => p.id === info.id);
-    if (!person || person.done) return;
-    person.status = '✅ ВЫДАНО';
-    person.done = true;
+
+    const newContent = toggleStatusInMessage(content);
+    if (!newContent) return;
+
     try {
-        await message.edit(createPersonMessage(person));
-        console.log(`✅ ${user.tag} отметил(а) получение для ${info.name}`);
-    } catch (err) { console.error(err); }
+        await message.edit(newContent);
+        console.log(`✅ ${user.tag} изменил статус в сообщении`);
+    } catch (err) {
+        console.error('Ошибка при обновлении:', err);
+    }
 });
 
+// Удаление реакции ✅
 client.on('messageReactionRemove', async (reaction, user) => {
     if (user.bot) return;
     if (reaction.partial) await reaction.fetch();
     if (reaction.emoji.name !== '✅') return;
+
     const message = reaction.message;
-    const info = personMessages.get(message.id);
-    if (!info) return;
-    if (user.id !== info.id) return;
-    const person = people.find(p => p.id === info.id);
-    if (!person || !person.done) return;
-    person.status = '⬜ НЕ ВЫДАНО';
-    person.done = false;
+    if (message.author.id !== client.user.id) return;
+
+    const content = message.content;
+    const targetUserId = extractUserIdFromMessage(content);
+    if (!targetUserId) return;
+    if (user.id !== targetUserId) return;
+
+    const newContent = toggleStatusInMessage(content);
+    if (!newContent) return;
+
     try {
-        await message.edit(createPersonMessage(person));
-        console.log(`↩️ ${user.tag} снял(а) отметку для ${info.name}`);
-    } catch (err) { console.error(err); }
+        await message.edit(newContent);
+        console.log(`↩️ ${user.tag} снял отметку в сообщении`);
+    } catch (err) {
+        console.error('Ошибка при обновлении:', err);
+    }
 });
 
 // ========== ВЕБ-СЕРВЕР ДЛЯ RAILWAY ==========
