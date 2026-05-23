@@ -18,12 +18,15 @@ const CHANNEL_ID = '1494290117269913690';
 
 // Сегодняшние люди (19 мая)
 const people = [
-    { id: '234734984131248128', name: 'Ден Картер',    amount: '74', status: '⬜ НЕ ВЫДАНО', done: false },
+    { id: '234734984131248128', name: 'Ден Картер', amount: '34', status: '⬜ НЕ ВЫДАНО', done: false },
+    { id: '906944617675628615', name: 'Езард Герра', amount: '84', status: '⬜ НЕ ВЫДАНО', done: false },
+    { id: '1476353140201750771', name: 'Вивьен Блэквуд', amount: '32', status: '⬜ НЕ ВЫДАНО', done: false },
+    { id: '450198219167891457', name: 'Глен Клири', amount: '28', status: '⬜ НЕ ВЫДАНО', done: false }
 ];
 
 function createHeader() {
     return `\`\`\`ansi
-[1;34m📖 ПРЕМИИ ЗА 21 МАЯ (БУХ.КНИГА)[0m
+[1;34m📖 ПРЕМИИ ЗА 22 МАЯ (БУХ.КНИГА)[0m
 [36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
 [47;30m  Каждый нажимает галочку под своим именем. Повторное нажатие снимает отметку.  [0m
 [33m✅ нажмите на галочку, чтобы отметить получение [0m
@@ -31,9 +34,11 @@ function createHeader() {
 }
 
 function createPersonMessage(person) {
+    // Выбираем цвет статуса: красный для "НЕ ВЫДАНО", зелёный для "ВЫДАНО"
+    const statusColor = person.status === '⬜ НЕ ВЫДАНО' ? '1;31m' : '1;32m';
     const ansiBlock = `\`\`\`ansi
 [36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
-[36m▸ ${person.name}[0m     [31m-${person.amount}[0m[32m$[0m    [1;31m${person.status}[0m
+[36m▸ ${person.name}[0m     [31m-${person.amount}[0m[32m$[0m    [${statusColor}${person.status}[0m
 [36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
 \`\`\``;
     const mention = `<@${person.id}>`;
