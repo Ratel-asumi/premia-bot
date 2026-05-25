@@ -18,12 +18,15 @@ const CHANNEL_ID = '1494290117269913690';
 
 // Сегодняшние люди (19 мая)
 const people = [
-    { id: '234734984131248128', name: 'Ден Картер', amount: '46', status: '⬜ НЕ ВЫДАНО', done: false },
+    { id: '906944617675628615', name: 'Езард Герра', amount: '42', status: '⬜ НЕ ВЫДАНО', done: false },
+    { id: '234734984131248128', name: 'Ден Картер', amount: '41', status: '⬜ НЕ ВЫДАНО', done: false },
+    { id: '1320767099299299389', name: 'Дейв Терамонт', amount: '25', status: '⬜ НЕ ВЫДАНО', done: false },
+    { id: '1476353140201750771', name: 'Вивьен Блэквуд', amount: '28', status: '⬜ НЕ ВЫДАНО', done: false }
 ];
 
 function createHeader() {
     return `\`\`\`ansi
-[1;34m📖 ПРЕМИИ ЗА 23 МАЯ (БУХ.КНИГА)[0m
+[1;34m📖 ПРЕМИИ ЗА 24 МАЯ (БУХ.КНИГА)[0m
 [36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
 [47;30m  Каждый нажимает галочку под своим именем. Повторное нажатие снимает отметку.  [0m
 [33m✅ нажмите на галочку, чтобы отметить получение [0m
@@ -51,9 +54,11 @@ function extractUserIdFromMessage(content) {
 // Переключает статус в тексте сообщения
 function toggleStatusInMessage(content) {
     if (content.includes('⬜ НЕ ВЫДАНО')) {
-        return content.replace('⬜ НЕ ВЫДАНО', '✅ ВЫДАНО');
+        // Заменяем красный цвет на зелёный и текст
+        return content.replace(/\[1;31m⬜ НЕ ВЫДАНО\[0m/g, '[1;32m✅ ВЫДАНО[0m');
     } else if (content.includes('✅ ВЫДАНО')) {
-        return content.replace('✅ ВЫДАНО', '⬜ НЕ ВЫДАНО');
+        // Заменяем зелёный цвет на красный и текст
+        return content.replace(/\[1;32m✅ ВЫДАНО\[0m/g, '[1;31m⬜ НЕ ВЫДАНО[0m');
     }
     return null;
 }
