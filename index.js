@@ -18,7 +18,7 @@ const CHANNEL_ID = '1494290117269913690';
 
 // Сегодняшние люди (19 мая)
 const people = [
-    { id: '234734984131248128', name: 'Ден Картер', amount: '57', status: '⬜ НЕ ВЫДАНО', done: false },
+    { id: '1118564313557385346', name: 'Дакота Акоста', amount: '20', status: '⬜ НЕ ВЫДАНО', done: false },
 ];
 
 function createHeader() {
