@@ -18,7 +18,7 @@ const CHANNEL_ID = '1494290117269913690';
 
 // Сегодняшние люди (19 мая)
 const people = [
-    { id: '1476353140201750771', name: 'Вивьен Блэквуд', amount: '207', status: '⬜ НЕ ВЫДАНО', done: false },
+    { id: '234734984131248128', name: 'Ден Картер', amount: '24', status: '⬜ НЕ ВЫДАНО', done: false }
 ];
 
 function createHeader() {
@@ -31,17 +31,15 @@ function createHeader() {
 }
 
 function createPersonMessage(person) {
-    // Выбираем цвет статуса: красный для "НЕ ВЫДАНО", зелёный для "ВЫДАНО"
     const statusColor = person.status === '⬜ НЕ ВЫДАНО' ? '1;31m' : '1;32m';
-    let ansiBlock = `\`\`\`ansi
-[36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
-[36m▸ ${person.name}[0m     [31m-${person.amount}[0m[32m$[0m    [${statusColor}${person.status}[0m
-[36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m`;
-
-    // Специальная приписка для Вивьен (только для неё)
-    if (person.id === '1476353140201750771') {
-        ansiBlock += `\n\n🛒 ОПТОВАЯ ПОКУПКА СТЕЙКОВ И ШОКОЛАДНОГО МУСА НА 170$`;
-    }
+    const ansiBlock = `\`\`\`ansi
+[36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+[36m▸ ${person.name}[0m [31m-${person.amount}[0m[32m$[0m [${statusColor}${person.status}[0m
+[36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+\`\`\``;
+    const mention = `<@${person.id}>`;
+    return ansiBlock.replace(/\n```$/, '```') + mention;
+}
 
     ansiBlock += `\n\`\`\``;
     const mention = `<@${person.id}>`;
