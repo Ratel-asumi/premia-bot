@@ -12,11 +12,9 @@ const client = new Client({
     partials: [Partials.Message, Partials.Reaction]
 });
 
-// ⚠️ ВСТАВЬТЕ ВАШ ТОКЕН (в кавычках)
 const TOKEN = process.env.TOKEN;
 const CHANNEL_ID = '1494290117269913690';
 
-// Сегодняшние люди (19 мая)
 const people = [
     { id: '234734984131248128', name: 'Ден Картер', amount: '24', status: '⬜ НЕ ВЫДАНО', done: false }
 ];
@@ -33,32 +31,23 @@ function createHeader() {
 function createPersonMessage(person) {
     const statusColor = person.status === '⬜ НЕ ВЫДАНО' ? '1;31m' : '1;32m';
     const ansiBlock = `\`\`\`ansi
-[36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
-[36m▸ ${person.name}[0m [31m-${person.amount}[0m[32m$[0m [${statusColor}${person.status}[0m
-[36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+[36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+[36m▸ ${person.name}[0m     [31m-${person.amount}[0m[32m$[0m    [${statusColor}${person.status}[0m
+[36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
 \`\`\``;
     const mention = `<@${person.id}>`;
     return ansiBlock.replace(/\n```$/, '```') + mention;
 }
 
-    ansiBlock += `\n\`\`\``;
-    const mention = `<@${person.id}>`;
-    return ansiBlock.replace(/\n```$/, '```') + mention;
-}
-
-// Извлекает ID пользователя из упоминания в конце сообщения
 function extractUserIdFromMessage(content) {
     const match = content.match(/<@!?(\d+)>$/);
     return match ? match[1] : null;
 }
 
-// Переключает статус в тексте сообщения
 function toggleStatusInMessage(content) {
     if (content.includes('⬜ НЕ ВЫДАНО')) {
-        // Заменяем красный цвет на зелёный и текст
         return content.replace(/\[1;31m⬜ НЕ ВЫДАНО\[0m/g, '[1;32m✅ ВЫДАНО[0m');
     } else if (content.includes('✅ ВЫДАНО')) {
-        // Заменяем зелёный цвет на красный и текст
         return content.replace(/\[1;32m✅ ВЫДАНО\[0m/g, '[1;31m⬜ НЕ ВЫДАНО[0m');
     }
     return null;
@@ -72,7 +61,6 @@ client.once('ready', async () => {
         return;
     }
     try {
-        // Отправляем только если сегодня ещё не отправляли (можно удалить старые вручную)
         await channel.send(createHeader());
         for (const person of people) {
             const message = await channel.send(createPersonMessage(person));
@@ -85,7 +73,6 @@ client.once('ready', async () => {
     }
 });
 
-// Добавление реакции ✅
 client.on('messageReactionAdd', async (reaction, user) => {
     if (user.bot) return;
     if (reaction.partial) await reaction.fetch();
@@ -115,7 +102,6 @@ client.on('messageReactionAdd', async (reaction, user) => {
     }
 });
 
-// Удаление реакции ✅
 client.on('messageReactionRemove', async (reaction, user) => {
     if (user.bot) return;
     if (reaction.partial) await reaction.fetch();
@@ -140,10 +126,8 @@ client.on('messageReactionRemove', async (reaction, user) => {
     }
 });
 
-// ========== ВЕБ-СЕРВЕР ДЛЯ RAILWAY ==========
 const app = express();
 app.get('/', (req, res) => res.send('Бот работает!'));
 app.listen(process.env.PORT || 3000, () => console.log('Сервер запущен для пингов'));
-// ===========================================
 
 client.login(TOKEN);
